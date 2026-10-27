@@ -1,0 +1,48 @@
+/* V4: remove the 560px mobile-width cap; respect the entire viewport. */
+:root{--sw-gutter:clamp(16px,3.7vw,56px)}
+html,body,main,.site-header,.site-footer{width:100%;max-width:100%}
+body{min-width:0;overflow-x:clip}
+.container{width:calc(100% - (2 * var(--sw-gutter)));max-width:1160px;margin-inline:auto;min-width:0}
+.hero,.hero-copy,.hero-stage,.explorer-card,.installation,.section-heading,.story-panel,.story-copy,.features-heading,.feature-grid,.season-gallery,.controls-panel,.live-pane{min-width:0;max-width:100%}
+.hero h1{white-space:normal;overflow-wrap:normal}
+.hero-lead,.section-heading p{max-width:65ch}
+.hero-stage{width:100%;justify-self:stretch}
+.scene-frame{max-width:min(100%,520px)}
+.scene-frame .weather-card{max-width:100%}
+@media (min-width:761px) and (max-width:1199px){
+  .container{max-width:none}
+  .hero{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);gap:clamp(20px,3vw,45px);padding-block:clamp(54px,6vw,82px);min-height:0}
+  .hero h1{font-size:clamp(43px,5.1vw,69px);letter-spacing:-.055em}
+  .hero-stage{min-height:400px}
+  .hero-stage .weather-card{width:min(100%,clamp(280px,33vw,410px))}
+  .explorer-card{grid-template-columns:minmax(0,1fr) minmax(0,.98fr)}
+}
+@media (max-width:760px){
+  .container{width:calc(100% - (2 * var(--sw-gutter)));max-width:none;margin-inline:auto}
+  .navbar{width:100%}
+  .hero{display:grid;grid-template-columns:minmax(0,1fr);width:calc(100% - (2 * var(--sw-gutter)));min-height:0;padding-block:clamp(33px,6vw,58px) clamp(28px,6vw,65px);row-gap:clamp(18px,4.5vw,35px)}
+  .hero-copy,.hero-stage{width:100%;max-width:none}
+  .hero h1{max-width:100%;font-size:clamp(43px,8.4vw,66px);line-height:1.06;letter-spacing:-.055em;margin-block:17px 21px}
+  .hero-lead{max-width:700px;font-size:clamp(15px,2.2vw,17px)}
+  .hero-stage{display:grid;place-items:center;min-height:0;padding-block:20px 49px}
+  .scene-frame{width:fit-content;max-width:calc(100% - 12px);margin-inline:auto;padding:clamp(12px,2.6vw,22px)}
+  .scene-frame .weather-card{width:min(clamp(300px,62vw,450px),calc(100vw - 76px));max-width:100%}
+  .stage-note{bottom:0}
+  .explorer-card,.story-panel,.installation{grid-template-columns:minmax(0,1fr)}
+  .controls-panel,.live-pane{width:100%}
+  .live-pane .weather-card{width:min(430px,calc(100vw - 85px))}
+  .feature-grid,.season-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .section-heading{width:100%}
+}
+@media (max-width:480px){
+  :root{--sw-gutter:16px}
+  .container,.hero{width:calc(100% - 32px)}
+  .hero h1{font-size:clamp(42px,11vw,55px)}
+  .hero-buttons{grid-template-columns:minmax(0,1fr)}
+  .scene-frame .weather-card{width:min(340px,calc(100vw - 72px))}
+  .feature-grid{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:360px){
+  .scene-frame .weather-card{width:calc(100vw - 78px)}
+  .hero h1{font-size:40px}
+}
