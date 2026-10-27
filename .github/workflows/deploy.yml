@@ -32,9 +32,14 @@ jobs:
           unzip -q Seasonal_Weather_Landing_Page_GitHub_Pages.zip -d _site
           cp site-overrides/index.html _site/index.html
           cat site-overrides/extra.css >> _site/styles.css
+          cat site-overrides/upgrade.css >> _site/styles.css
+          cp site-overrides/upgrade.js _site/upgrade.js
+          sed -i 's@</body>@<script src="upgrade.js" defer></script></body>@' _site/index.html
           test -f _site/index.html
           test -f _site/styles.css
           test -f _site/app.js
+          test -f _site/upgrade.js
+          grep -q 'upgrade.js' _site/index.html
           test -f _site/downloads/Seasonal_Weather_Widget_Kit.zip
           test -f _site/assets/backgrounds/fall_sunny_day.jpg
           if grep -qi 'Duo Fold' _site/index.html; then echo 'Old story still present'; exit 1; fi
