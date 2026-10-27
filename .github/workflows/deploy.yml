@@ -3,8 +3,6 @@ name: Publish Seasonal Weather
 on:
   push:
     branches: [main]
-    paths:
-      - 'seasonal-weather-site.zip'
   workflow_dispatch:
 
 permissions:
@@ -18,6 +16,7 @@ concurrency:
 
 jobs:
   deploy:
+    if: ${{ github.ref == 'refs/heads/main' }}
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -25,21 +24,30 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-      - name: Prepare website from the uploaded ZIP
+
+      - name: Prepare website from uploaded ZIP
         run: |
+          set -e
           mkdir -p _site
-          unzip -q seasonal-weather-site.zip -d _site
+          unzip -q Seasonal_Weather_Landing_Page_GitHub_Pages.zip -d _site
+          cp site-overrides/index.html _site/index.html
+          cat site-overrides/extra.css >> _site/styles.css
           test -f _site/index.html
           test -f _site/styles.css
           test -f _site/app.js
           test -f _site/downloads/Seasonal_Weather_Widget_Kit.zip
           test -f _site/assets/backgrounds/fall_sunny_day.jpg
+          if grep -qi 'Duo Fold' _site/index.html; then echo 'Old story still present'; exit 1; fi
+          echo "Seasonal Weather website ready"
+
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
+
       - name: Upload website artifact
         uses: actions/upload-pages-artifact@v4
         with:
           path: _site
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
