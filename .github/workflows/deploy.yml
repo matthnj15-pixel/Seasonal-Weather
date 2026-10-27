@@ -33,6 +33,7 @@ jobs:
           cp site-overrides/index.html _site/index.html
           cat site-overrides/extra.css >> _site/styles.css
           cat site-overrides/upgrade.css >> _site/styles.css
+          cat site-overrides/fullwidth.css >> _site/styles.css
           cp site-overrides/upgrade.js _site/upgrade.js
           sed -i 's@</body>@<script src="upgrade.js" defer></script></body>@' _site/index.html
           test -f _site/index.html
