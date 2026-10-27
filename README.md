@@ -10,19 +10,13 @@ A free, small-format iPhone weather widget that combines a live local forecast w
 
 ## Website publication status
 
-**The repository is configured for GitHub Pages deployment.** It needs one remaining file: `seasonal-weather-site.zip`.
+**The website package is uploaded and the GitHub Actions workflow is configured.** To publish, enable GitHub Pages at **Settings → Pages → Build and deployment → Source: GitHub Actions**, then rerun the **Publish Seasonal Weather** workflow in Actions.
 
-The full website ZIP was prepared in the original ChatGPT conversation and contains the landing page, all 96 images, the widget script, and the iPhone installation package. To finish publishing:
-
-1. Download `seasonal-weather-site.zip` from the ChatGPT conversation.
-2. Open this GitHub repository → **Add file → Upload files**.
-3. Upload the ZIP **without extracting it**, into the repository root. Keep the filename `seasonal-weather-site.zip`, then commit to `main`.
-4. Open **Settings → Pages → Build and deployment → Source** and select **GitHub Actions**.
-5. Open **Actions → Publish Seasonal Weather** and verify the deployment succeeds. If needed, select **Run workflow**.
+The GitHub Actions workflow extracts the uploaded ZIP, applies the latest approved landing page copy and styling from `site-overrides/`, and deploys it automatically.
 
 The site URL will be: **https://matthnj15-pixel.github.io/Seasonal-Weather/**
 
-The workflow at `.github/workflows/deploy.yml` extracts and deploys the actual site, including its background images and downloadable install kit. Updating the ZIP triggers another deployment.
+The workflow at `.github/workflows/deploy.yml` extracts and deploys the actual site, including its background images and downloadable install kit. Commits to `main` trigger another deployment.
 
 ## Privacy and compatibility
 
