@@ -1,0 +1,6 @@
+/* V2 product proposition: tap through to Apple Weather */
+.tap-footnote{font-size:11px!important;color:#8496af!important;margin-top:16px!important;line-height:1.6!important}
+.story-art-label{position:absolute;z-index:3;right:24px;bottom:26px;display:flex;align-items:center;gap:13px;padding:13px 18px;border:1px solid rgba(255,255,255,.28);border-radius:15px;background:rgba(9,20,37,.68);backdrop-filter:blur(14px);box-shadow:0 12px 36px rgba(0,0,0,.27);font-size:12px;line-height:1.5;color:#cad9e8}
+.story-art-label strong{font-size:14px;font-weight:650;color:white}
+.story-art-label-icon{display:flex;align-items:center;justify-content:center;width:34px;height:34px;background:rgba(178,218,253,.22);color:white;border-radius:10px;font-size:22px}
+@media(max-width:760px){.story-art-label{bottom:19px;right:19px}}
