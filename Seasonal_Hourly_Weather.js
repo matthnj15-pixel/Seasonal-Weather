@@ -33,7 +33,16 @@ const SETTINGS = {
   // e.g. testSeason: "winter", testCondition: "snow", testPhase: "day"
   testSeason: null,
   testCondition: null,
-  testPhase: null
+  testPhase: null,
+  // Special editions use the calendar date in the weather location.
+  specialEditions: true,
+  specialDates: [
+    { key: "birthday_a", month: 10, day: 6, label: "Birthday" },
+    { key: "birthday_b", month: 7, day: 9, label: "Birthday" }
+  ],
+  // Optional preview only inside Scriptable. Leave null for automatic dates.
+  // e.g. "halloween", "christmas", "birthday_a"
+  testEdition: null
 };
 
 const C = {
@@ -76,8 +85,8 @@ function artworkInstalled() {
 async function importArtwork(force = false) {
   if (config.runsInWidget || (!force && artworkInstalled())) return;
   const alert = new Alert();
-  alert.title = "Install seasonal backgrounds";
-  alert.message = "Unzip the Weather Kit in Files. Choose the SeasonalWeatherArt folder when prompted. You only do this once.";
+  alert.title = "Install weather backgrounds";
+  alert.message = "Unzip the Weather Kit in Files. Select the SeasonalWeatherArt folder to install both seasonal and special-edition artwork.";
   alert.addAction("Choose artwork folder");
   alert.addCancelAction("Preview without artwork");
   const choice = await alert.presentAlert();
@@ -95,52 +104,55 @@ async function importArtwork(force = false) {
     const seasons = ["spring", "summer", "fall", "winter"];
     const states = ["sunny", "partly", "cloudy", "rain", "heavy", "storm", "snow", "fog"];
     const phases = ["day", "twilight", "night"];
-    let copied = 0;
-    let failed = 0;
-
+    const fileNames = [];
     for (const season of seasons) {
-      for (const state of states) {
-        for (const phase of phases) {
-          const name = `${season}_${state}_${phase}.jpg`;
-          const src = fm.joinPath(folder, name);
-          const dst = fm.joinPath(artDir, name);
-          try {
-            let raw = null;
-            try { raw = fm.read(src); } catch (e) {}
-            if (!raw && cloud) {
-              try {
-                await cloud.downloadFileFromiCloud(src);
-                raw = cloud.read(src);
-              } catch (e) {}
-            }
-            if (!raw) throw new Error("Cannot read file");
-            fm.write(dst, raw);
-            copied++;
+      for (const state of states) for (const phase of phases) {
+        fileNames.push(season + "_" + state + "_" + phase + ".jpg");
+        fileNames.push(season + "_" + state + "_" + phase + "_wide.jpg");
+      }
+    }
+    for (const edition of EDITION_KEYS) {
+      for (const state of states) for (const phase of phases) {
+        fileNames.push("holiday_" + edition + "_" + state + "_" + phase + ".jpg");
+        fileNames.push("holiday_" + edition + "_" + state + "_" + phase + "_wide.jpg");
+      }
+    }
 
-            // The same art pack may contain 2:1 landscape variants.
-            // These are optional, because older 96-image packs still work.
-            const wideName = name.replace(".jpg", "_wide.jpg");
-            const wideSrc = fm.joinPath(folder, wideName);
-            const wideDst = fm.joinPath(artDir, wideName);
-            try {
-              let wideBytes = null;
-              try { wideBytes = fm.read(wideSrc); } catch (e) {}
-              if (!wideBytes && cloud) {
-                try {
-                  await cloud.downloadFileFromiCloud(wideSrc);
-                  wideBytes = cloud.read(wideSrc);
-                } catch (e) {}
-              }
-              if (wideBytes) fm.write(wideDst, wideBytes);
-            } catch (e) {}
-          } catch (e) { failed++; }
+    let copied = 0;
+    let standardCount = 0;
+    let holidayCount = 0;
+    let available = null;
+    try { available = new Set(fm.listContents(folder)); } catch (e) {}
+    if (!available && cloud) {
+      try { available = new Set(cloud.listContents(folder)); } catch (e) {}
+    }
+    const missing = [];
+    for (const name of fileNames) {
+      if (available && !available.has(name)) continue; // old art packs are supported
+      const src = fm.joinPath(folder, name);
+      const dst = fm.joinPath(artDir, name);
+      try {
+        let raw = null;
+        try { raw = fm.read(src); } catch (e) {}
+        if (!raw && cloud) {
+          try {
+            await cloud.downloadFileFromiCloud(src);
+            raw = cloud.read(src);
+          } catch (e) {}
         }
+        if (!raw) throw new Error("Cannot read file");
+        fm.write(dst, raw);
+        copied++;
+        if (name.startsWith("holiday_")) holidayCount++;
+        else standardCount++;
+      } catch (e) {
+        missing.push(name);
       }
     }
 
     const result = new Alert();
-    result.title = copied === 96 ? "Artwork installed" : "Artwork import result";
-    result.message = `${copied} of 96 backgrounds imported.${failed ? " Reopen the extracted SeasonalWeatherArt folder to retry missing files." : " The widget is ready."}`;
+    result.title = standardCount >= 96 ? "Artwork installed" : "Artwork import result";
+    result.message = `${standardCount} seasonal and ${holidayCount} holiday images imported. Holiday scenes have optional square and wide variants.${missing.length ? " Some images could not be read; try importing again." : " The widget is ready."}`;
     result.addAction("OK");
     await result.presentAlert();
   } catch (e) {
@@ -148,7 +160,87 @@ async function importArtwork(force = false) {
   }
 }
 
-// GPS LOCATION. Never hard-code Lewistown or any other city.
+// SPECIAL EDITIONS: use local calendar dates at the forecast location.
+// These return an edition key, not a new weather condition.
+const EDITION_KEYS = [
+  "july4", "christmas", "newyear", "easter", "thanksgiving",
+  "halloween", "memorial", "labor", "birthday_a", "birthday_b"
+];
+
+function nthWeekday(year, month, weekday, n) {
+  const first = new Date(Date.UTC(year, month - 1, 1)).getUTCDay();
+  return 1 + ((weekday - first + 7) % 7) + 7 * (n - 1);
+}
+function lastWeekday(year, month, weekday) {
+  const last = new Date(Date.UTC(year, month, 0));
+  return last.getUTCDate() - ((last.getUTCDay() - weekday + 7) % 7);
+}
+function easterSunday(year) {
+  // Gregorian computus; returns {month, day} for the given year.
+  const a = year % 19;
+  const b = Math.floor(year / 100);
+  const c = year % 100;
+  const d = Math.floor(b / 4);
+  const e = b % 4;
+  const f = Math.floor((b + 8) / 25);
+  const g = Math.floor((b - f + 1) / 3);
+  const h = (19 * a + b - d - g + 15) % 30;
+  const i = Math.floor(c / 4);
+  const k = c % 4;
+  const l = (32 + 2 * e + 2 * i - h - k + 7 * 6) % 7;
+  const m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const month = Math.floor((h + l - 7 * m + 114) / 31);
+  const day = ((h + l - 7 * m + 114) % 31) + 1;
+  return { month, day };
+}
+
+function resolveSpecialEdition(loc, data, instantMs = Date.now()) {
+  if (!SETTINGS.specialEditions) return null;
+  if (!config.runsInWidget && SETTINGS.testEdition &&
+      EDITION_KEYS.includes(SETTINGS.testEdition)) return SETTINGS.testEdition;
+  // Open-Meteo returns the UTC offset for the forecast's own time zone,
+  // including any applicable daylight saving time adjustment.
+  const offset = data ? (data.utc_offset_seconds || 0) : 0;
+  const local = new Date(instantMs + offset * 1000);
+  const year = local.getUTCFullYear();
+  const month = local.getUTCMonth() + 1;
+  const day = local.getUTCDate();
+
+  // Personal dates are editable. Keep names out of the open source script.
+  for (const item of SETTINGS.specialDates || []) {
+    if (item && item.month === month && item.day === day &&
+        EDITION_KEYS.includes(item.key)) return item.key;
+  }
+  if (month === 7 && day === 4) return "july4";
+  if (month === 12 && day === 25) return "christmas";
+  if ((month === 12 && day === 31) || (month === 1 && day === 1)) return "newyear";
+  if (month === 10 && day === 31) return "halloween";
+  if (month === 11 && day === nthWeekday(year, 11, 4, 4)) return "thanksgiving";
+  if (month === 5 && day === lastWeekday(year, 5, 1)) return "memorial";
+  if (month === 9 && day === nthWeekday(year, 9, 1, 1)) return "labor";
+  const easter = easterSunday(year);
+  if (month === easter.month && day === easter.day) return "easter";
+  return null;
+}
+
+// Use one naming convention for both widget sizes and artwork fallbacks.
+function backgroundNames(loc, weather) {
+  const season = !config.runsInWidget && SETTINGS.testSeason
+    ? SETTINGS.testSeason : seasonAt(loc, weather);
+  const state = !config.runsInWidget && SETTINGS.testCondition
+    ? SETTINGS.testCondition
+    : weather ? weatherStyle(weather.current.weather_code) : "cloudy";
+  const phase = !config.runsInWidget && SETTINGS.testPhase
+    ? SETTINGS.testPhase : solarPhase(weather);
+  const usual = season + "_" + state + "_" + phase;
+  const edition = resolveSpecialEdition(loc, weather);
+  return {
+    ordinary: usual,
+    festive: edition ? "holiday_" + edition + "_" + state + "_" + phase : null
+  };
+}
+
+// GPS LOCATION. Never hard-code any city.
 async function getLocation() {
   const old = readJSON(locationFile);
   try {
@@ -331,27 +423,21 @@ function hourLabel(unix, utcOffset) {
 }
 
 function applyBackground(widget, loc, weather) {
-  const day = !weather || weather.current.is_day !== 0;
-  const season = !config.runsInWidget && SETTINGS.testSeason
-    ? SETTINGS.testSeason : seasonAt(loc, weather);
-  const state = !config.runsInWidget && SETTINGS.testCondition
-    ? SETTINGS.testCondition : weather ? weatherStyle(weather.current.weather_code) : "cloudy";
-  const phase = !config.runsInWidget && SETTINGS.testPhase
-    ? SETTINGS.testPhase : solarPhase(weather);
-  const filename = `${season}_${state}_${phase}.jpg`;
-  const file = fm.joinPath(artDir, filename);
-
-  try {
-    if (fm.fileExists(file)) {
-      const picture = fm.readImage(file);
-      if (picture) {
-        widget.backgroundImage = picture;
-        return filename;
+  const bases = backgroundNames(loc, weather);
+  const options = [bases.festive, bases.ordinary].filter(Boolean);
+  for (const base of options) {
+    const file = fm.joinPath(artDir, base + ".jpg");
+    try {
+      if (fm.fileExists(file)) {
+        const picture = fm.readImage(file);
+        if (picture) {
+          widget.backgroundImage = picture;
+          return base;
+        }
       }
-    }
-  } catch (e) {}
-
-  // Fallback works even before importing the art pack.
+    } catch (e) {}
+  }
+  const day = !weather || weather.current.is_day !== 0;
   const gradient = new LinearGradient();
   gradient.colors = day
     ? [new Color("#2C6194"), new Color("#72A1CF")]
@@ -460,32 +546,21 @@ function mediumArtwork(source) {
 }
 
 function applyMediumBackground(widget, loc, weather) {
-  const season = !config.runsInWidget && SETTINGS.testSeason
-    ? SETTINGS.testSeason : seasonAt(loc, weather);
-  const state = !config.runsInWidget && SETTINGS.testCondition
-    ? SETTINGS.testCondition
-    : weather ? weatherStyle(weather.current.weather_code) : "cloudy";
-  const phase = !config.runsInWidget && SETTINGS.testPhase
-    ? SETTINGS.testPhase : solarPhase(weather);
-  const base = season + "_" + state + "_" + phase;
-  const widePath = fm.joinPath(artDir, base + "_wide.jpg");
-  const regularPath = fm.joinPath(artDir, base + ".jpg");
-  try {
-    if (fm.fileExists(widePath)) {
-      widget.backgroundImage = fm.readImage(widePath);
-      return;
-    }
-    if (fm.fileExists(regularPath)) {
-      const original = fm.readImage(regularPath);
+  const bases = backgroundNames(loc, weather);
+  // Prefer genuine 2:1 holiday art, then a cropped square holiday scene,
+  // then the ordinary 2:1 scene, then the square seasonal fallback.
+  for (const base of [bases.festive, bases.ordinary].filter(Boolean)) {
+    for (const suffix of ["_wide.jpg", ".jpg"]) {
+      const file = fm.joinPath(artDir, base + suffix);
       try {
-        widget.backgroundImage = mediumArtwork(original);
-      } catch (e) {
-        widget.backgroundImage = original;
-      }
-      return;
+        if (!fm.fileExists(file)) continue;
+        const picture = fm.readImage(file);
+        if (!picture) continue;
+        widget.backgroundImage = suffix === ".jpg" ? mediumArtwork(picture) : picture;
+        return base;
+      } catch (e) {}
     }
-  } catch (e) {}
-  // The normal weather-dependent gradient is still available offline.
+  }
   applyBackground(widget, loc, weather);
 }
 
