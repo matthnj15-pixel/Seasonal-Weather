@@ -4,6 +4,9 @@
 // Forecast data: Open-Meteo. Location: your device GPS.
 // Artwork pack: SeasonalWeatherArt (import once in Scriptable).
 
+// ASCII-only construction avoids degree-sign corruption in copy/paste or downloads.
+const DEGREE_SIGN = String.fromCharCode(176);
+
 const SETTINGS = {
   forecastHours: 3,
   refreshMinutes: 30,
@@ -395,7 +398,7 @@ function buildWidget(loc, weather) {
   }
 
   body.addSpacer(SETTINGS.locationToTemp);
-  addText(body, weather ? `${Math.round(weather.current.temperature_2m)}°` : "--°",
+  addText(body, weather ? `${Math.round(weather.current.temperature_2m)}${DEGREE_SIGN}` : "--" + DEGREE_SIGN,
     Font.lightSystemFont(SETTINGS.currentTempFont), C.white);
   body.addSpacer(SETTINGS.tempToCondition);
   addText(body, weather ? labelFor(weather.current.weather_code, weather.current.is_day !== 0) : "Weather unavailable",
@@ -420,7 +423,7 @@ function buildWidget(loc, weather) {
       col.addSpacer(SETTINGS.hourToIcon);
       addIcon(col, hour.code, hour.day, SETTINGS.hourIcon);
       col.addSpacer(SETTINGS.iconToDegrees);
-      addText(col, `${Math.round(hour.temp)}°`, Font.mediumSystemFont(SETTINGS.hourlyTempFont), C.white);
+      addText(col, `${Math.round(hour.temp)}${DEGREE_SIGN}`, Font.mediumSystemFont(SETTINGS.hourlyTempFont), C.white);
       row.addSpacer();
     }
   }
@@ -513,8 +516,8 @@ function buildMediumWidget(loc, weather) {
   // allowing a flexible spacer to separate them.
   w.addSpacer(0);
   addText(w, weather
-    ? String(Math.round(weather.current.temperature_2m)) + "°"
-    : "--°", Font.lightSystemFont(40), C.white);
+    ? String(Math.round(weather.current.temperature_2m)) + DEGREE_SIGN
+    : "--" + DEGREE_SIGN, Font.lightSystemFont(40), C.white);
   w.addSpacer(0);
   addText(w, weather
     ? labelFor(weather.current.weather_code, daytime)
@@ -547,7 +550,7 @@ function buildMediumWidget(loc, weather) {
       column.addSpacer(3);
       addIcon(column, hour.code, hour.day, 17);
       column.addSpacer(3);
-      addText(column, String(Math.round(hour.temp)) + "°",
+      addText(column, String(Math.round(hour.temp)) + DEGREE_SIGN,
         Font.mediumSystemFont(14), C.white);
       row.addSpacer();
     }
