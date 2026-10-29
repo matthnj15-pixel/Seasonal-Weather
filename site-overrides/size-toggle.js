@@ -38,6 +38,21 @@
   }
 
   function applyImage(card) {
+    // The responsive preview's transition layer owns the visible image.
+    // Select the 2:1 asset for medium rather than stretching a square one.
+    const season = document.querySelector('[data-season].selected')?.dataset.season || "fall";
+    const weather = document.querySelector('[data-condition].selected')?.dataset.condition || "sunny";
+    const phase = document.querySelector('[data-phase].selected')?.dataset.phase || "day";
+    const path = "assets/backgrounds/" + season + "_" + weather + "_" + phase +
+      (size === "medium" ? "_wide" : "") + ".jpg";
+    const layers = card.querySelectorAll(".scene-layer");
+    const visibleLayer = layers[layers.length - 1];
+    if (visibleLayer) {
+      const target = 'url("' + path + '")';
+      if (visibleLayer.style.backgroundImage !== target) {
+        visibleLayer.style.backgroundImage = target;
+      }
+    }
     const bg = card.style.backgroundImage;
     if (!bg || bg === "none") return;
     if (size === "medium" && !bg.includes("_wide.jpg")) {
@@ -89,6 +104,9 @@
     }
     new MutationObserver(() => applyImage(card))
       .observe(card, {attributes:true,attributeFilter:["style"]});
+    // Catch each new background layer after the original app updates weather.
+    new MutationObserver(() => applyImage(card))
+      .observe(card, {childList:true});
   }
   setSize("small");
 })();
