@@ -70,8 +70,8 @@ function artworkInstalled() {
   } catch (e) { return false; }
 }
 
-async function importArtwork() {
-  if (config.runsInWidget || artworkInstalled()) return;
+async function importArtwork(force = false) {
+  if (config.runsInWidget || (!force && artworkInstalled())) return;
   const alert = new Alert();
   alert.title = "Install seasonal backgrounds";
   alert.message = "Unzip the Weather Kit in Files. Choose the SeasonalWeatherArt folder when prompted. You only do this once.";
@@ -562,7 +562,12 @@ async function previewSize() {
   alert.message = "One script supports both Home Screen widget sizes.";
   alert.addAction("Small · 3 hours");
   alert.addAction("Medium · 5 hours");
+  alert.addAction("Import / update artwork");
   const selected = await alert.presentAlert();
+  if (selected === 2) {
+    await importArtwork(true);
+    return await previewSize();
+  }
   return selected === 1 ? "medium" : "small";
 }
 
