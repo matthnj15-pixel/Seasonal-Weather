@@ -1,29 +1,39 @@
 # Seasonal Weather
 
-A free, small-format iPhone weather widget that combines a live local forecast with seasonal scenery. Built with [Scriptable](https://scriptable.app/) and [Open-Meteo](https://open-meteo.com/).
+A free Scriptable weather widget for iPhone with seasonal scenery, your current GPS location, live conditions, and an hourly forecast. The **same script automatically supports two Home Screen sizes**:
 
-- Current GPS location, temperature, and weather condition
-- Next three hourly forecasts
-- 96 local weather backgrounds: 4 seasons × 8 conditions × 3 lighting modes
-- Tap the widget to open Apple Weather via its unofficial `weather://` URL scheme
-- A responsive, interactive public landing page
+| Widget size | Current weather | Future forecast | Artwork |
+| --- | --- | --- | --- |
+| Small (1:1) | Location, temperature, condition | Next **3** hours | Square seasonal scenes |
+| Medium (2:1) | Location, temperature, condition | Next **5** hours | Wide seasonal scenes |
 
-## Website publication status
+## Install
 
-**The website package is uploaded and the GitHub Actions workflow is configured.** To publish, enable GitHub Pages at **Settings → Pages → Build and deployment → Source: GitHub Actions**, then rerun the **Publish Seasonal Weather** workflow in Actions.
+1. Visit [the Seasonal Weather website](https://matthnj15-pixel.github.io/Seasonal-Weather/) and download the **complete widget kit**.
+2. Unzip the kit on your iPhone and open **Scriptable**.
+3. Create one script called `Seasonal Hourly Weather`, and paste the included `Seasonal_Hourly_Weather.js`.
+4. Run the script once and select the extracted `SeasonalWeatherArt` folder when prompted. Grant location permission.
+5. Add a **small** and/or **medium** Scriptable widget to the Home Screen. Select **the same script** for either one.
 
-The GitHub Actions workflow extracts the uploaded ZIP, applies the latest approved landing page copy and styling from `site-overrides/`, and deploys it automatically.
+The widget detects `config.widgetFamily` and renders the appropriate layout. The Scriptable app also offers a small/medium preview picker. You don't need two scripts or duplicate weather requests.
 
-The site URL will be: **https://matthnj15-pixel.github.io/Seasonal-Weather/**
+**Existing small-widget users:** The new code works with the original 96-image pack. If you haven't imported the wide images yet, the medium widget crops the installed square image as a fallback. Import the new art pack to use the 96 dedicated wide-format images.
 
-The workflow at `.github/workflows/deploy.yml` extracts and deploys the actual site, including its background images and downloadable install kit. Commits to `main` trigger another deployment.
+## Weather and backgrounds
 
-## Privacy and compatibility
+- Four seasons × eight weather scenes × day/twilight/night = **96 conditions**, each with square and 2:1 artwork, **192 background files** in the installer.
+- Weather data is fetched from [Open-Meteo](https://open-meteo.com/) using on-device GPS coordinates.
+- Tapping the widget attempts to launch Apple Weather through the unofficial `weather://` URL scheme. This isn't guaranteed on all iOS versions.
+- iOS controls widget refresh timing; the script requests a refresh after 30 minutes and caches recent data on the device.
 
-The public landing page previews simulated conditions and does not access the visitor's location. The installed widget obtains GPS coordinates with Scriptable permission and sends coordinates to Open-Meteo to retrieve forecasts. Cache files are stored on the iPhone. The project contains no hardcoded hometown, personal credentials, or API keys.
+## Source and publishing
 
-The link to Apple Weather uses an unofficial iOS URL scheme, so its behavior may vary with iOS version. iOS also controls when widgets refresh.
+The single canonical Scriptable source is [Seasonal_Hourly_Weather.js](Seasonal_Hourly_Weather.js). The website's download script and ZIP installation kit are generated from this file, and the 2:1 images are derived from the original scenery during publishing.
 
-## Attribution and licensing
+This repository's [GitHub Actions workflow](.github/workflows/deploy.yml) assembles the site and installer and deploys to [GitHub Pages](https://matthnj15-pixel.github.io/Seasonal-Weather/).
 
-Forecast data: [Open-Meteo](https://open-meteo.com/), subject to its attribution and noncommercial-use terms. This is an independent project and is not affiliated with Apple or Scriptable. The packaged website includes a code license; the publisher should confirm artwork licensing before public redistribution.
+## Privacy and licensing
+
+The website uses example data and does not request location. The installed widget requests location permission through Scriptable, caches the result locally, and sends coordinates to Open-Meteo to fetch local weather. There are no hardcoded hometowns, user credentials, or API keys in the code.
+
+Forecast data attribution: Open-Meteo, subject to its current licensing/attribution terms. Independent Scriptable project; not affiliated with Apple.
