@@ -34,12 +34,20 @@ jobs:
           cat site-overrides/extra.css >> _site/styles.css
           cat site-overrides/upgrade.css >> _site/styles.css
           cat site-overrides/fullwidth.css >> _site/styles.css
+          cat site-overrides/size-toggle.css >> _site/styles.css
           cp site-overrides/upgrade.js _site/upgrade.js
-          sed -i 's@</body>@<script src="upgrade.js" defer></script></body>@' _site/index.html
+          cp site-overrides/size-toggle.js _site/size-toggle.js
+          sed -i 's@</body>@<script src="upgrade.js" defer></script><script src="size-toggle.js" defer></script></body>@' _site/index.html
+          python3 -m pip install --disable-pip-version-check pillow==11.3.0
+          python3 tools/build_widget_kit.py _site
           test -f _site/index.html
           test -f _site/styles.css
           test -f _site/app.js
           test -f _site/upgrade.js
+          test -f _site/size-toggle.js
+          test -f _site/assets/backgrounds/fall_sunny_day_wide.jpg
+          grep -q 'size-toggle.js' _site/index.html
+          grep -q 'config.widgetFamily' _site/downloads/Seasonal_Hourly_Weather.js
           grep -q 'upgrade.js' _site/index.html
           test -f _site/downloads/Seasonal_Weather_Widget_Kit.zip
           test -f _site/assets/backgrounds/fall_sunny_day.jpg
