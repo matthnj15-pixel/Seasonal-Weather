@@ -54,7 +54,7 @@ when launched inside Scriptable.
 All 96 weather scenes are supplied in 1:1 and 2:1 aspect ratios.
 If you already have the earlier art pack, the medium widget still works
 and can crop the square imagery on-device. For the dedicated wide scenes,
-reimport artwork from the updated installation kit.
+run the script in Scriptable, choose Import / update artwork,\nand select the new SeasonalWeatherArt folder.
 
 The weather:// tap link for Apple Weather is unofficial.
 Location is obtained on-device; weather data comes from Open-Meteo.
