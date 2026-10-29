@@ -1,0 +1,32 @@
+/* Adaptive size selector for the small and medium widget demos */
+.size-selector{display:flex;gap:4px;align-items:center;justify-content:center;padding:4px;background:rgba(8,17,30,.55);border:1px solid rgba(205,232,255,.18);border-radius:15px;margin:0 0 18px;max-width:100%;z-index:4}
+.size-selector button{border:0;cursor:pointer;padding:9px 16px;line-height:1.3;border-radius:11px;color:#a7bdd4;background:transparent;transition:background .2s,color .2s;min-height:44px;font:inherit;font-size:13px}
+.size-selector button span{display:block;font-size:10px;opacity:.78}
+.size-selector button.is-active{color:white;background:#344f6c;box-shadow:0 2px 12px #060e1a88}
+.size-selector button:focus-visible{outline:2px solid white;outline-offset:2px}
+.live-pane{overflow:visible}
+.live-pane .size-selector{width:max-content}
+.weather-card.is-medium-preview{aspect-ratio:2 / 1;justify-content:flex-start;padding:clamp(12px,2.3vw,20px)!important;border-radius:28px!important}
+.scene-frame .weather-card.is-medium-preview{width:min(450px,calc(100vw - 80px))!important;max-width:100%!important}
+.live-pane .weather-card.is-medium-preview{width:min(470px,100%)!important;max-width:100%!important}
+.weather-card.is-medium-preview .place{font-size:clamp(12px,1.4vw,16px)}
+.weather-card.is-medium-preview .current-icon{font-size:clamp(20px,2vw,28px)}
+.weather-card.is-medium-preview .current-reading{margin-top:0}
+.weather-card.is-medium-preview .big-temp{font-size:clamp(38px,5vw,60px)!important;line-height:1;letter-spacing:-2px}
+.weather-card.is-medium-preview .condition{font-size:clamp(11px,1.4vw,14px);margin-bottom:5px}
+.weather-card.is-medium-preview .forecast-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:3px}
+.weather-card.is-medium-preview .forecast-hour .time{font-size:clamp(9px,1vw,11px)}
+.weather-card.is-medium-preview .forecast-hour .symbol{font-size:clamp(14px,1.9vw,20px);height:19px;margin:2px 0}
+.weather-card.is-medium-preview .forecast-hour .degrees{font-size:clamp(12px,1.5vw,17px)}
+@media(max-width:760px){
+  .live-pane .weather-card.is-medium-preview{width:min(470px,calc(100vw - 80px))!important}
+  .scene-frame .weather-card.is-medium-preview{width:min(470px,calc(100vw - 80px))!important}
+  .weather-card.is-medium-preview .big-temp{font-size:clamp(38px,9vw,55px)!important}
+  .weather-card.is-medium-preview .forecast-hour .time{font-size:10px}
+  .live-pane{overflow:hidden}
+}
+@media(max-width:390px){
+  .size-selector button{padding:8px 10px}
+  .weather-card.is-medium-preview{padding:12px!important}
+}
+@media(prefers-reduced-motion:reduce){.size-selector button{transition:none}}
