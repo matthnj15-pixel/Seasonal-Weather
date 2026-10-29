@@ -5,6 +5,8 @@ from zipfile import ZipFile, ZIP_DEFLATED
 from PIL import Image
 from generate_holiday_art import generate
 import sys
+import os
+from install_rendered_art import integrate
 
 site = Path(sys.argv[1])
 source = Path("Seasonal_Hourly_Weather.js")
@@ -36,6 +38,18 @@ for path in square_art:
 
 holiday_count = generate(images)
 assert holiday_count == 480
+
+# Independently AI-rendered art takes priority over the old procedural output.
+# Full release mode refuses incomplete master packs rather than silently
+# shipping placeholder images as completed photorealistic artwork.
+rendered = Path('artwork/photoreal')
+if rendered.is_dir():
+    strict = os.environ.get('AI_ART_STRICT', 'false').lower() == 'true'
+    installed, missing = integrate(rendered, images, strict=strict)
+    if installed < 480:
+        print(f'Warning: {480-installed} scenes still use legacy artwork. Not V3 release-ready.')
+elif os.environ.get('AI_ART_STRICT', 'false').lower() == 'true':
+    raise RuntimeError('Photoreal artwork pack not present; release blocked')
 assert len(list(images.glob("*.jpg"))) == 672
 
 js = source.read_bytes()
