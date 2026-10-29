@@ -43,7 +43,9 @@
     const season = document.querySelector('[data-season].selected')?.dataset.season || "fall";
     const weather = document.querySelector('[data-condition].selected')?.dataset.condition || "sunny";
     const phase = document.querySelector('[data-phase].selected')?.dataset.phase || "day";
-    const path = "assets/backgrounds/" + season + "_" + weather + "_" + phase +
+    const edition = window.SeasonalEditionPreview?.selectedEdition || "standard";
+    const base = edition === "standard" ? season : "holiday_" + edition;
+    const path = "assets/backgrounds/" + base + "_" + weather + "_" + phase +
       (size === "medium" ? "_wide" : "") + ".jpg";
     const layers = card.querySelectorAll(".scene-layer");
     const visibleLayer = layers[layers.length - 1];
@@ -55,11 +57,8 @@
     }
     const bg = card.style.backgroundImage;
     if (!bg || bg === "none") return;
-    if (size === "medium" && !bg.includes("_wide.jpg")) {
-      card.style.backgroundImage = bg.replace(".jpg", "_wide.jpg");
-    } else if (size === "small" && bg.includes("_wide.jpg")) {
-      card.style.backgroundImage = bg.replace("_wide.jpg", ".jpg");
-    }
+    const chosen = 'url("' + path + '")';
+    if (bg !== chosen) card.style.backgroundImage = chosen;
   }
 
   function setSize(next) {
@@ -108,5 +107,6 @@
     new MutationObserver(() => applyImage(card))
       .observe(card, {childList:true});
   }
+  window.addEventListener("sw-edition-change", () => cards.forEach(applyImage));
   setSize("small");
 })();
