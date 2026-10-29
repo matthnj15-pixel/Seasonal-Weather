@@ -1,0 +1,23 @@
+.edition-select-shell{position:relative;max-width:100%;margin-top:11px}
+.edition-select-shell select{appearance:none;-webkit-appearance:none;width:100%;min-height:48px;border:1px solid rgba(190,221,250,.30);background:#263b53;color:#fff;border-radius:12px;padding:12px 44px 12px 14px;font-size:14px;cursor:pointer}
+.edition-select-shell select:focus-visible{outline:2px solid #d7e8fa;outline-offset:3px}
+.edition-select-shell>span{position:absolute;right:16px;top:11px;font-size:22px;color:#e1e9f5;pointer-events:none}
+.edition-input-label{display:block;font-size:13px;color:#c2d2e5;margin-top:10px}
+.edition-picker-note{font-size:12px;color:#98adc7;line-height:1.55;margin:11px 0 0}
+.holiday-gallery-section{padding-top:clamp(65px,7vw,105px)}
+.holiday-gallery-section .landscapes-head{display:flex;align-items:end;justify-content:space-between;gap:25px;margin-bottom:27px}
+.holiday-gallery-section h2{font-size:clamp(34px,5vw,58px);line-height:1.08;letter-spacing:-.05em;margin:14px 0}
+.holiday-gallery-section h2 em{font-style:normal;color:#b9d7fb}
+.holiday-gallery-section .landscapes-head p{max-width:50ch;color:#aec0d4;line-height:1.6}
+.holiday-gallery{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+.holiday-tile{appearance:none;border:1px solid rgba(200,223,245,.16);background:#17283d;color:white;border-radius:16px;overflow:hidden;padding:0;text-align:left;cursor:pointer;min-width:0;box-shadow:0 9px 25px rgba(0,0,0,.14);transition:transform .2s ease,border-color .2s ease}
+.holiday-tile:hover{transform:translateY(-4px);border-color:rgba(209,230,254,.6)}
+.holiday-tile:focus-visible{outline:3px solid #cae5ff;outline-offset:3px}
+.holiday-tile[aria-pressed="true"]{border-color:#c1ddfc;box-shadow:0 0 0 2px rgba(193,221,252,.35)}
+.holiday-tile img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover}
+.holiday-caption{padding:11px 12px 13px;display:flex;flex-direction:column;gap:4px}
+.holiday-caption strong{font-size:13px;line-height:1.35}
+.holiday-caption small{font-size:11px;line-height:1.45;color:#adc3d9}
+@media(max-width:950px){.holiday-gallery{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:600px){.holiday-gallery{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.holiday-gallery-section .landscapes-head{align-items:start;flex-direction:column;gap:9px}.holiday-gallery-section h2{font-size:clamp(35px,9vw,49px)}.holiday-tile img{aspect-ratio:1.2 / 1}}
+@media(prefers-reduced-motion:reduce){.holiday-tile{transition:none}}
