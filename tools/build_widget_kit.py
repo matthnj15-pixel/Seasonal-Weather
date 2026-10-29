@@ -3,7 +3,7 @@
 from pathlib import Path
 from zipfile import ZipFile, ZIP_DEFLATED
 from PIL import Image
-import io
+from generate_holiday_art import generate
 import sys
 
 site = Path(sys.argv[1])
@@ -34,6 +34,10 @@ for path in square_art:
     wide = crop.resize((960, 480), Image.Resampling.LANCZOS)
     wide.save(path.with_name(path.stem + "_wide.jpg"), "JPEG", quality=85, optimize=True)
 
+holiday_count = generate(images)
+assert holiday_count == 480
+assert len(list(images.glob("*.jpg"))) == 672
+
 js = source.read_bytes()
 (downloads / "Seasonal_Hourly_Weather.js").write_bytes(js)
 
@@ -51,10 +55,20 @@ Medium: current weather + next 5 hours.
 The script detects widget size automatically, and previews both sizes
 when launched inside Scriptable.
 
-All 96 weather scenes are supplied in 1:1 and 2:1 aspect ratios.
-If you already have the earlier art pack, the medium widget still works
-and can crop the square imagery on-device. For the dedicated wide scenes,
-run the script in Scriptable, choose Import / update artwork,\nand select the new SeasonalWeatherArt folder.
+The package includes 96 standard weather scenes and 240 special-edition
+weather scenes, each in square and 2:1 wide format: 672 images total.
+
+Holiday editions: Fourth of July, Christmas, New Year's Eve and Day, Easter,
+Thanksgiving, Halloween, Memorial Day, Labor Day, October 6 birthday,
+and July 9 birthday.
+
+Set SETTINGS.specialEditions=false to opt out. Change the two entries in
+SETTINGS.specialDates for your own birthdays. Holiday activation uses
+the local date of the weather location; other days use regular backgrounds.
+
+To upgrade an earlier install, open the new script inside Scriptable,
+choose Import / update artwork, and select the extracted SeasonalWeatherArt
+folder. The old seasonal art remains supported as a fallback.
 
 The weather:// tap link for Apple Weather is unofficial.
 Location is obtained on-device; weather data comes from Open-Meteo.
@@ -70,8 +84,14 @@ temp_zip.replace(kit_path)
 
 with ZipFile(kit_path) as check:
     names = check.namelist()
-    if len([n for n in names if n.startswith("SeasonalWeatherArt/") and n.endswith(".jpg")]) != 192:
-        raise RuntimeError("Installation kit did not contain all 192 images")
+    if len([n for n in names if n.startswith("SeasonalWeatherArt/") and n.endswith(".jpg")]) != 672:
+        raise RuntimeError("Installation kit did not contain all 672 images")
     if check.read("Seasonal_Hourly_Weather.js") != js:
         raise RuntimeError("Website script and installer script are different")
-print(f"Built adaptive widget installer with 192 images: {kit_path.stat().st_size:,} bytes")
+# Verify representative holiday artwork in both aspect ratios.
+for suffix, expected_ratio in ((".jpg", 1.0), ("_wide.jpg", 2.0)):
+    sample = images / ("holiday_christmas_sunny_day" + suffix)
+    with Image.open(sample) as image:
+        ratio = image.size[0] / image.size[1]
+        assert abs(ratio - expected_ratio) < .01, (sample, ratio)
+print(f"Built adaptive widget kit with 672 images (480 special): {kit_path.stat().st_size:,} bytes")
