@@ -2,6 +2,7 @@
 """Build the single-script installation kit and 2:1 artwork for GitHub Pages."""
 from pathlib import Path
 from zipfile import ZipFile, ZIP_DEFLATED
+from io import BytesIO
 from PIL import Image
 from generate_holiday_art import generate
 import sys
@@ -37,6 +38,43 @@ for path in square_art:
 holiday_count = generate(images)
 assert holiday_count == 480
 assert len(list(images.glob("*.jpg"))) == 672
+
+# A user-uploaded ZIP can replace selected holiday images with individually
+# AI-rendered art. This is a binary asset import, not procedural generation.
+# Keep it optional so existing public installations remain functional.
+easter_zip = Path("Seasonal_Weather_Photoreal_Easter_Addon.zip")
+if easter_zip.exists():
+    expected_easter = {
+        "holiday_easter_sunny_day.jpg",
+        "holiday_easter_sunny_day_wide.jpg",
+        "holiday_easter_partly_day.jpg",
+        "holiday_easter_partly_day_wide.jpg",
+        "holiday_easter_rain_day.jpg",
+        "holiday_easter_rain_day_wide.jpg",
+        "holiday_easter_sunny_twilight.jpg",
+        "holiday_easter_sunny_twilight_wide.jpg",
+        "holiday_easter_sunny_night.jpg",
+        "holiday_easter_sunny_night_wide.jpg",
+    }
+    with ZipFile(easter_zip) as archive:
+        found = {Path(n).name for n in archive.namelist() if n.endswith(".jpg")}
+        if found != expected_easter:
+            raise RuntimeError(f"Easter art archive incomplete: {sorted(expected_easter - found)}; unexpected: {sorted(found - expected_easter)}")
+        for name in sorted(expected_easter):
+            entry = "SeasonalWeatherArt/" + name
+            if entry not in archive.namelist():
+                raise RuntimeError(f"Missing required art folder entry: {entry}")
+            raw = archive.read(entry)
+            with Image.open(BytesIO(raw)) as picture:
+                picture.verify()
+            with Image.open(BytesIO(raw)) as picture:
+                ratio = picture.width / picture.height
+                if picture.format != "JPEG" or picture.width < 1000 or abs(ratio - (2 if name.endswith("_wide.jpg") else 1)) > .01:
+                    raise RuntimeError(f"Invalid photoreal image: {name}, {picture.size}")
+            (images / name).write_bytes(raw)
+    print(f"Installed {len(expected_easter)} verified AI-rendered Easter images into website and kit")
+else:
+    print("Photoreal Easter source ZIP not uploaded yet; retaining existing Easter backgrounds")
 
 js = source.read_bytes()
 (downloads / "Seasonal_Hourly_Weather.js").write_bytes(js)
