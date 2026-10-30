@@ -27,6 +27,14 @@ Edit `SETTINGS.specialDates` to change the birthdays, or set `SETTINGS.specialEd
 
 The kit contains **672 images**: 96 standard weather scenes in square and wide formats (192), plus 10 editions × 8 conditions × 3 lighting phases × 2 aspect ratios (480). The themed images are composited from the original weather scenes with decorative artwork at the edges, so the sky and forecast remain coherent. If you already installed Seasonal Weather, run the updated script in Scriptable and select **Import / update artwork** to add the holiday images. Old packs still work without holiday images.
 
+## Photoreal Easter artwork update
+
+Ten individually AI-rendered Easter backgrounds are available as the optional binary archive `Seasonal_Weather_Photoreal_Easter_Addon.zip`. This pack contains five matched square and wide scenes for sunny day, partly cloudy day, rainy day, twilight, and night. The other Easter weather/lighting combinations continue using the established fallback images until their artwork is completed.
+
+**For an existing Scriptable installation:** Unzip the add-on in iOS Files, run the existing Seasonal Hourly Weather script, select **Import / update artwork**, and choose the new `SeasonalWeatherArt` folder. The existing script copies the ten JPEGs without needing reinstall or code replacement. The holiday automatically activates on Easter Sunday. Use `SETTINGS.testEdition = "easter"` inside Scriptable for preview.
+
+**For website/installer publishing:** Place the binary `Seasonal_Weather_Photoreal_Easter_Addon.zip` file in the root of this repository. The GitHub Pages build validates all ten JPEGs, preserves their aspect ratios, overwrites the corresponding prior Easter backgrounds, and includes the resulting images in both the gallery and complete installation kit. If the ZIP is absent, the previously deployed images remain available. Do not commit incomplete, flattened, or contact-sheet images under the expected names.
+
 ## Weather and backgrounds
 
 - Four seasons × eight weather conditions × three lighting modes = **96 standard scenes**, each in square and 2:1 art; 480 additional holiday artworks are included.
